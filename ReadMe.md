@@ -63,9 +63,8 @@ to connect to the database.
                         }
 
 The above code will create a Stored Procedure in MySQL database,however if a Stored procedure with the similar name exists it will throw `SQLSyntaxErrorException` highlighting that the stored procedure exists.
-Moreover,in case of bad SQL statement it will throw `SQLException`.
 
-#### 2.2 Filtering Records Stored Procedure.
+#### 2.2 Filtering Data (IN).
 Now since we know the basic stucture of stored procedure.Let consider a scenario were we need to dispay results based on a certain conditions e.g age.
 A SQL query can be defined as `SELECT * FROM kyc_database.customer WHERE customer.age=age;` but how do we do this in a Stored Procedure.
 
@@ -79,10 +78,11 @@ Hence we declare the input type and direction within our stored procedure as sho
                        BEGIN
                            SELECT * FROM kyc_database.customer WHERE customer.age=age;
                        END
- 
+ *Tech Hint* 
+ ***IN - The parameter value is passed in from the caller to the procedure.The procedure can assign a different value to the parameter, but this change is not visible to the caller.***
                               
- #### 2.3 OUT
- Considering a scenario were we  need to return `sum` of all the promotional points from the given dataset.
+ #### 2.3 Returning Data (OUT)
+ Considering a scenario were we need to return `sum` of all the promotional points from the given dataset.
  
  Since the result is an `output` we can explicitly indicate this within our stored Procedure as well as datatype as shown below
                      
@@ -91,7 +91,7 @@ Hence we declare the input type and direction within our stored procedure as sho
                           SELECT SUM(promotion_point) INTO totalPoints FROM customer;
                       END
 
-#### 2.4 IN OUT combined
+#### 2.4 Filtering and Returning Data combined(INOUT)
 Scenario were we can combine both IN and OUT
 
                       CREATE PROCEDURE findCustomberBySurname(INOUT surname VARCHAR(50))
@@ -100,24 +100,24 @@ Scenario were we can combine both IN and OUT
                       END
                     
                     
-#### 2.5 both INOUT procedure
+#### 2.5 Filtering and Returning Data(IN/OUT)
         
                      CREATE PROCEDURE findCustomerAgeByName(IN name VARCHAR(50),OUT age Integer)
                      BEGIN
                        SELECT customer.age into age  FROM customer WHERE customer.name = name;
                      END
 
-#### 3. Delete(Dropping) Stored Procedure
+### 3.0 Delete(Dropping) Stored Procedure
 Creating a stored procedure with a name similar to an existing stored procedure will throw `SQLSyntaxErrorException` with a narrative specifying that the given procedure already exists.
 
-There is not way to edit stored procedure body apart from changing its characteristics,so whenever we need to change our
+There is no way we can edit stored procedure *body* apart from changing its characteristics,so whenever we need to change our
 stored procedure SQL statements we must delete the existing procedure and recreate it.
 
 The following command is used to delete stored procedure.
 
                       DROP PROCEDURE [IF EXISTS] procedure_name
          
-If the stored procedure does not exist it will throw Exception.We can `IF EXISTS` so that it returns a warning instead of error.
+If the stored procedure does not exists it will return error.We can add `IF EXISTS` so that it returns a warning instead of error.
 
 
 Calling delete procedure from Spring Boot
@@ -126,7 +126,7 @@ Calling delete procedure from Spring Boot
                           final String queryDrop = "DROP PROCEDURE IF EXISTS " + procedureName;
                           jdbcTemplate.execute(queryDrop);
                        }
-#### 4. Calling Stored Procedure
+### 4.0 Calling Stored Procedure
 When invorking/calling a stored procedure we use a `call statement` as shown below
 
                        call procedure_name([input/output parameters if required]);
