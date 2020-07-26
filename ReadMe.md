@@ -64,7 +64,7 @@ to connect to the database.
 
 The above code will create a Stored Procedure in MySQL database,however if a Stored procedure with the similar name exists it will throw `SQLSyntaxErrorException` highlighting that the stored procedure exists.
 
-#### 2.2 Filtering Data (IN).
+#### 2.2 Filtering Data (IN parameter).
 Now since we know the basic stucture of stored procedure.Let consider a scenario were we need to dispay results based on a certain conditions e.g age.
 A SQL query can be defined as `SELECT * FROM kyc_database.customer WHERE customer.age=age;` but how do we do this in a Stored Procedure.
 
@@ -78,10 +78,10 @@ Hence we declare the input type and direction within our stored procedure as sho
                        BEGIN
                            SELECT * FROM kyc_database.customer WHERE customer.age=age;
                        END
- *Tech Hint* 
- ***IN - The parameter value is passed in from the caller to the procedure.The procedure can assign a different value to the parameter, but this change is not visible to the caller.***
+
+ ***IN(input parameter) - The parameter value is passed in from the caller to the procedure.The procedure can assign a different value to the parameter, but this change is not visible to the caller.***
                               
- #### 2.3 Returning Data (OUT)
+ #### 2.3 Returning Data (OUTPUT parameter)
  Considering a scenario were we need to return `sum` of all the promotional points from the given dataset.
  
  Since the result is an `output` we can explicitly indicate this within our stored Procedure as well as datatype as shown below
@@ -90,16 +90,17 @@ Hence we declare the input type and direction within our stored procedure as sho
                       BEGIN
                           SELECT SUM(promotion_point) INTO totalPoints FROM customer;
                       END
+  ***OUT(output parameter) -  The caller passes a variable as the parameter. Any value the parameter has when it is passed is ignored by the procedure, and its initial value within the procedure is NULL. The procedure sets its value, and after the procedure terminates, the parameter value is passed back from the procedure to the caller. The caller sees that value when it accesses the variable.***
 
-#### 2.4 Filtering and Returning Data combined(INOUT)
+#### 2.4 Filtering and Returning Data(INOUT two way)
 Scenario were we can combine both IN and OUT
 
                       CREATE PROCEDURE findCustomberBySurname(INOUT surname VARCHAR(50))
                       BEGIN
                         SELECT customer.surname INTO surname  FROM  customer WHERE customer.surname=surname;
                       END
-                    
-                    
+***INOUTindicates a two-way parameter that can be used both for input and for output. The value passed by the caller is the parameter’s initial value within the procedure. If the procedure changes the parameter value, that value is seen by the caller after the procedure terminates.***
+                   
 #### 2.5 Filtering and Returning Data(IN/OUT)
         
                      CREATE PROCEDURE findCustomerAgeByName(IN name VARCHAR(50),OUT age Integer)
