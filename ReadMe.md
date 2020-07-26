@@ -133,8 +133,88 @@ When invorking/calling a stored procedure we use a `call statement` as shown bel
                        call procedure_name([input/output parameters if required]);
                     
 for simplicity of this tutorial we will only call `INOUT` procedure(`findCustomerAgeByName`) defined in section 2.5
-given a name this procedure will return customer age.
-                    
+Calling findCustomerAgeByName procedure with name = `tanaka` returns age is equal to 45.
+There are many ways in which we can execute stored procedures from Spring boot.
+#### 4.1  SimpleJdbcCall
+When using SimpleJdbcCall we need to provide procedureName and input,output or both parametes as defined in the saved stored procedure.
+
+SimpleJdbcCall is multi-threaded.
+
+                      @Override
+                       public Integer findCustomerByAge(String name) {
+                         final SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName("findCustomerAgeByName");
+                         final Map<String, String> inputParameters = new HashMap<>();
+                         inputParameters.put("name", name);
+                         inputParameters.put("age", "@age");
+                         final SqlParameterSource sqlParameterSource = new MapSqlParameterSource(inputParameters);
+                         final Integer result = jdbcCall.executeObject(Integer.class, sqlParameterSource);
+                          return result;
+                       }
+                       
+
+Testing our code
+
+                       @Test
+                       @DisplayName("retreive customer age using name")
+                        void givenCustomerNameWhenfindCustomerByAgeShouldReturnCustomerAge() {
+                              final String name = "Tanaka";
+                              final Integer age = customerRepository.findCustomerByAge(name);
+                              assertThat(age).as("Customer Age").isNotNull();
+                              assertThat(age).as("Age").isEqualTo(45L);
+                        }
+#### 4.2  StoredProcedure
+StoredProcedure is a superclass for object abstractions of RDBMS stored procedures.
+
+Similar approach as in SimpleJdbcCall is then applied.
+
+                        @Override
+                        public Integer findCustomerByAgeUsingStoredProcedure(String name) {
+                              final CustomStoredProcedure customStoredProcedure = new  CustomStoredProcedure(jdbcTemplate, "findCustomerAgeByName");
+                              final SqlParameter sqlName = new SqlParameter("name", Types.VARCHAR);
+                              final SqlOutParameter outParameter = new SqlOutParameter("age", Types.INTEGER);
+                              final SqlParameter[] sqlParameters = {sqlName,outParameter};
+                              customStoredProcedure.setParameters(sqlParameters);
+                              customStoredProcedure.setJdbcTemplate(jdbcTemplate);
+                              customStoredProcedure.compile();
+                              Map<String,Object> storedProcResult = customStoredProcedure.execute(name, "age");
+                              return (Integer)storedProcResult.get("age");
+                        }
+                        
+#### 4.3  CallableStatement
+CallableStatement is an interface that is used to execute SQL stored procedures.
+
+Numbers starting from 1 are used when defining input,output or both parameters in CallableStatement.
+
+All output parameters are registered prior the execution of the stored procedure.
+
+Output values are retrieved after query execution using get methods.
+
+                        @Override
+                        public Integer findCustomerByAgeUsingCallableStatement(String name) throws SQLException {
+                              final Connection connection = jdbcTemplate.getDataSource().getConnection();
+                              final CallableStatement callableStatement = connection.prepareCall("{call findCustomerAgeByName(?, ?)}");
+                              callableStatement.setString(1, name);
+                              callableStatement.registerOutParameter(2, Types.INTEGER);
+                              callableStatement.executeUpdate();
+                              return callableStatement.getInt(2);
+                        }
+#### 4.4  JdbcTemplate
+JdbcTemplate simplifies the use of JDBC and helps to avoid common errors.(central class in Jdbc package)
+
+                        @Override
+                        public Integer findCustomerByAgeUsingJdbcStatement(String name) throws SQLException {
+                               final SqlParameter nameParameter = new SqlParameter(Types.VARCHAR);
+                               final SqlOutParameter outParameter = new SqlOutParameter("age", Types.INTEGER);
+                               final String callStoredProcedure = "{call findCustomerAgeByName(?, ?)}";
+                               Map<String, Object> resultMap = jdbcTemplate.call(connection -> {
+                                    CallableStatement callableStatement = connection.prepareCall(callStoredProcedure);
+                                    callableStatement.setString(1, name);
+                                    callableStatement.registerOutParameter(2, Types.INTEGER);
+                                    return callableStatement;
+                               }, Arrays.asList(nameParameter,outParameter));
+                              return (Integer)resultMap.get("age");
+                        }
+
          
 
 #### 5. Alter Stored Procedure
@@ -204,5 +284,7 @@ Lets retreive information on `findAllCustomers` procedure
                         }
 
 #### 6. Conclusion
-Stored procedures plays a crucial role in creating reporting dashboards.
+In this article,we illustrated how to create stored procedures utilising Spring boot properties file.How to call/execute
+stored procedures using SimpleJdbc,StoredProcedure,CallableStatement and JdbcTemplate.
+Code for this article is available at  
 
