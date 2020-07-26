@@ -107,4 +107,90 @@ Scenario were we can combine both IN and OUT
                     SELECT customer.age into age  FROM customer WHERE customer.name = name;
                   END
 
+#### 3. Delete(Dropping) Stored Procedure
+Creating a stored procedure with a name similar to an existing stored procedure will throw `SQLSyntaxErrorException` with a narrative specifying that the given procedure already exists.
+
+There is not way to edit stored procedure body apart from changing its characteristics,so whenever we need to change our
+stored procedure SQL statements we must delete the existing procedure and recreate it.
+
+The following command is used to delete stored procedure.
+
+         DROP PROCEDURE [IF EXISTS] procedure_name
+         
+If the stored procedure does not exist it will throw Exception.We can `IF EXISTS` so that it returns a warning instead of error.
+
+
+Calling delete procedure from Spring Boot
+      
+                               public void deleteStoredProcedures(String procedureName) {
+                                   final String queryDrop = "DROP PROCEDURE IF EXISTS " + procedureName;
+                                   jdbcTemplate.execute(queryDrop);
+                                }
+#### 4. Calling Stored Procedure
+When invorking/calling a stored procedure we use a `call statement` as shown below
+
+                    call procedure_name([input/output parameters if required]);
+                    
+for simplicity of this tutorial we will only call `INOUT` procedure(`findCustomerAgeByName`) defined in section 2.5
+given a name this procedure will return customer age.
+                    
+         
+
+#### 5. Alter Stored Procedure
+On altering Stored Procedure we can only change  the characteristics of a stored procedure but we cannot chane sql body or parameters.
+These parameters are optional and they can appear in any order.
+   - SQL security {DEFINER|INVOKER} - runs either with the privileges of the user who created it or the user who invoked it.
+    (Definer) - causes the routine to have the privileges of the user who created it. This is the default value.
+    (Invoker) - causes the routine to run with the privileges of its invoking user. This means the routine has access to database objects only if that user can  already access them otherwise.
+    
+  -  SQL SECURITY DEFINER enables you to create routines that access information on behalf of users who otherwise would not be able to do so
+  -  DETERMINISTIC or NOT DETERMINISTIC - Indicates whether the routine always produces the same result when invoked with a given set of input parameter values(used    for query optimisation)[Default not Deterministic]
+  - LANGUAGE SQL-Indicates the language in which the routine is written.
+  - COMMENT ‘string’ - Specifies a descriptive string for the routine.The string is displayed by the statements that return information about routine definitions
+       
+                                      ALTER PROCEDURE procedure_name [characteristics]
+ 
+ For the simplicity of this tutorial lets focus on adding a comment to the existing query.
+ 
+                       
+                       
+                       ALTER PROCEDURE findAllCustomers
+                         SQL SECURITY INVOKER
+                         COMMENT 'This procedure returns all customers';
+                         
+ Altering stored procedure from Spring boot
+ 
+                         public void alterCustomerRetreiveProcedure(){
+                           final String query =  environment.getProperty("customer.procedure.alter.find.all");
+                           jdbcTemplate.execute(query);
+                          }
+#### 6. Reading Stored Procedure Metadata.
+MySQL creates INFORMATION_SCHEMA database with ROUTINES table that contains information about stored procedure.
+
+Lets retreive information on `findAllCustomers` procedure
+
+                                 @Test
+                                 @DisplayName("retreive procedure information")
+                                 void viewProcedureInformationShouldReturnProcedureInformation() {
+                                    final ProcedureDto procedureDto = customerRepository.viewStoredProceduresInformation();
+                                    assertThat(procedureDto).as("procedure information object").isNotNull();
+                                    assertThat(procedureDto.getRoutineSchema()).as("database where procedure is defined")
+                                                                               .isEqualTo("kyc_database");
+                                    assertThat(procedureDto.getName()).as("procedure name").isEqualTo("findAllCustomers");
+                                    assertThat(procedureDto.getRoutineBodyDefination()).as("routine body definition(query)")
+                                                                                     .isEqualTo("BEGIN Select * from customer; END");
+                                    assertThat(procedureDto.getRoutineBodyLanguage()).as("routine body language").isEqualTo("SQL");
+                                    assertThat(procedureDto.getDateCreated()).as("date when procedure was created")
+                                                                             .isEqualTo("2020-07-25 18:37:40");
+                                    assertThat(procedureDto.getComment()).as("procedure comment")
+                                                                         .isEqualTo("This procedure returns all customers");
+                                    assertThat(procedureDto.getDefiner()).as("procedure definer").isEqualTo("root@%");
+                                    assertThat(procedureDto.getDeterminstic()).as("determinstic").isEqualTo("NO");
+                                    assertThat(procedureDto.getLastAltered()).as("date when procedure was altered")
+                                                                             .isEqualTo("2020-07-25 18:37:39");
+                                    assertThat(procedureDto.getSecurityType()).as("security type").isEqualTo(null);
+                                    assertThat(procedureDto.getSqlMode()).as("sql mode").isEqualTo("INVOKER");
+                                    }
+
+#### 6. Conclusion
 
