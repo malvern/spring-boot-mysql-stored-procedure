@@ -99,7 +99,7 @@ Scenario were we can combine both IN and OUT
                       BEGIN
                         SELECT customer.surname INTO surname  FROM  customer WHERE customer.surname=surname;
                       END
-***INOUTindicates a two-way parameter that can be used both for input and for output. The value passed by the caller is the parameter’s initial value within the procedure. If the procedure changes the parameter value, that value is seen by the caller after the procedure terminates.***
+***INOUT(two way) - indicates a two-way parameter that can be used both for input and for output. The value passed by the caller is the parameter’s initial value within the procedure. If the procedure changes the parameter value, that value is seen by the caller after the procedure terminates.***
                    
 #### 2.5 Filtering and Returning Data(IN/OUT)
         
