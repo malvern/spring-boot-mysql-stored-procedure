@@ -31,36 +31,36 @@ This article will focus mainly on how to create Stored Procedure using Spring Bo
 ### 2.0 Basic Stored Procedure Structure
 A basic Stored Procedure consists of a **procedure name** and **routine body** defined in the format below.
 
-           CREATE PROCEDURE stored_procedure_name
-           routine_body:
-                 Valid SQL routine statements
+                      CREATE PROCEDURE stored_procedure_name
+                        routine_body:
+                             Valid SQL routine statements
 
 routine body can contain compound statements.
 #### 2.1 Read Stored Procedure
 Using the above stored procedure structure lets create a procedure to retreive all customers from the database.
     
-         CREATE PROCEDURE findAllCustomers()
-         BEGIN
-            SELECT * FROM customer;
-         END
+                      CREATE PROCEDURE findAllCustomers()
+                       BEGIN
+                         SELECT * FROM customer;
+                       END
 Notice we have added BEGIN/END to specify a block of our compound statement(s).
 Lets define the above stored procedure within Spring application.properties file(*yml file was used for this article for easy readbility*).
 
-               customer:
-                   procedure:
-                         find:
-                           all: CREATE PROCEDURE findAllCustomers()
-                                BEGIN
-                                   SELECT * FROM customer;
-                                END
+                      customer:
+                        procedure:
+                               find:
+                                   all: CREATE PROCEDURE findAllCustomers()
+                                        BEGIN
+                                           SELECT * FROM customer;
+                                        END
 
 Utilizing Spring Environment to read from stored procedure from `application.yml` file and JdbcTemplate 
 to connect to the database.
 
-                           public void createCustomerRetreiveProcedure() {
-                              final String query = environment.getProperty("customer.procedure.find.all");
+                        public void createCustomerRetreiveProcedure() {
+                             final String query = environment.getProperty("customer.procedure.find.all");
                              jdbcTemplate.execute(query);
-                           }
+                        }
 
 The above code will create a Stored Procedure in MySQL database,however if a Stored procedure with the similar name exists it will throw `SQLSyntaxErrorException` highlighting that the stored procedure exists.
 Moreover,in case of bad SQL statement it will throw `SQLException`.
@@ -75,10 +75,10 @@ In our case since we need to input age that is going to be used within our SQL f
 
 Hence we declare the input type and direction within our stored procedure as shown below.
 
-                              CREATE PROCEDURE findCustomersByAge(IN age INTEGER)
-                              BEGIN
-                                 SELECT * FROM kyc_database.customer WHERE customer.age=age;
-                              END
+                       CREATE PROCEDURE findCustomersByAge(IN age INTEGER)
+                       BEGIN
+                           SELECT * FROM kyc_database.customer WHERE customer.age=age;
+                       END
  
                               
  #### 2.3 OUT
@@ -86,26 +86,26 @@ Hence we declare the input type and direction within our stored procedure as sho
  
  Since the result is an `output` we can explicitly indicate this within our stored Procedure as well as datatype as shown below
                      
-                     CREATE PROCEDURE sumPromotionalPoints(OUT totalPoints VARCHAR(50))
-                     BEGIN
+                      CREATE PROCEDURE sumPromotionalPoints(OUT totalPoints VARCHAR(50))
+                      BEGIN
                           SELECT SUM(promotion_point) INTO totalPoints FROM customer;
-                     END
+                      END
 
 #### 2.4 IN OUT combined
 Scenario were we can combine both IN and OUT
 
-                    CREATE PROCEDURE findCustomberBySurname(INOUT surname VARCHAR(50))
-                    BEGIN
+                      CREATE PROCEDURE findCustomberBySurname(INOUT surname VARCHAR(50))
+                      BEGIN
                         SELECT customer.surname INTO surname  FROM  customer WHERE customer.surname=surname;
-                    END
+                      END
                     
                     
 #### 2.5 both INOUT procedure
         
-                  CREATE PROCEDURE findCustomerAgeByName(IN name VARCHAR(50),OUT age Integer)
-                  BEGIN
-                    SELECT customer.age into age  FROM customer WHERE customer.name = name;
-                  END
+                     CREATE PROCEDURE findCustomerAgeByName(IN name VARCHAR(50),OUT age Integer)
+                     BEGIN
+                       SELECT customer.age into age  FROM customer WHERE customer.name = name;
+                     END
 
 #### 3. Delete(Dropping) Stored Procedure
 Creating a stored procedure with a name similar to an existing stored procedure will throw `SQLSyntaxErrorException` with a narrative specifying that the given procedure already exists.
@@ -115,21 +115,21 @@ stored procedure SQL statements we must delete the existing procedure and recrea
 
 The following command is used to delete stored procedure.
 
-         DROP PROCEDURE [IF EXISTS] procedure_name
+                      DROP PROCEDURE [IF EXISTS] procedure_name
          
 If the stored procedure does not exist it will throw Exception.We can `IF EXISTS` so that it returns a warning instead of error.
 
 
 Calling delete procedure from Spring Boot
       
-                               public void deleteStoredProcedures(String procedureName) {
-                                   final String queryDrop = "DROP PROCEDURE IF EXISTS " + procedureName;
-                                   jdbcTemplate.execute(queryDrop);
-                                }
+                       public void deleteStoredProcedures(String procedureName) {
+                          final String queryDrop = "DROP PROCEDURE IF EXISTS " + procedureName;
+                          jdbcTemplate.execute(queryDrop);
+                       }
 #### 4. Calling Stored Procedure
 When invorking/calling a stored procedure we use a `call statement` as shown below
 
-                    call procedure_name([input/output parameters if required]);
+                       call procedure_name([input/output parameters if required]);
                     
 for simplicity of this tutorial we will only call `INOUT` procedure(`findCustomerAgeByName`) defined in section 2.5
 given a name this procedure will return customer age.
@@ -148,30 +148,40 @@ These parameters are optional and they can appear in any order.
   - LANGUAGE SQL-Indicates the language in which the routine is written.
   - COMMENT ‘string’ - Specifies a descriptive string for the routine.The string is displayed by the statements that return information about routine definitions
        
-                                      ALTER PROCEDURE procedure_name [characteristics]
+                       ALTER PROCEDURE procedure_name [characteristics]
  
- For the simplicity of this tutorial lets focus on adding a comment to the existing query.
+ For the simplicity of this tutorial lets focus on adding a comment to the existing query and changing SQL security from Definer to Invoker.
  
                        
                        
                        ALTER PROCEDURE findAllCustomers
-                         SQL SECURITY INVOKER
-                         COMMENT 'This procedure returns all customers';
+                       SQL SECURITY INVOKER
+                       COMMENT 'This procedure returns all customers';
                          
  Altering stored procedure from Spring boot
  
-                         public void alterCustomerRetreiveProcedure(){
-                           final String query =  environment.getProperty("customer.procedure.alter.find.all");
-                           jdbcTemplate.execute(query);
-                          }
+                       public void alterCustomerRetreiveProcedure(){
+                          final String query =  environment.getProperty("customer.procedure.alter.find.all");
+                          jdbcTemplate.execute(query);
+                       }
+                       
+Using all the above steps stored procedure we can present stored procedure as follows:
+
+
+                       CREATE PROCEDURE procedureName ([parameters]) 
+                         [characteristics]
+                        routine_body:
+                            Valid SQL routine statements
+                                
+                        
 #### 6. Reading Stored Procedure Metadata.
 MySQL creates INFORMATION_SCHEMA database with ROUTINES table that contains information about stored procedure.
 
 Lets retreive information on `findAllCustomers` procedure
 
-                                 @Test
-                                 @DisplayName("retreive procedure information")
-                                 void viewProcedureInformationShouldReturnProcedureInformation() {
+                       @Test
+                       @DisplayName("retreive procedure information")
+                        void viewProcedureInformationShouldReturnProcedureInformation() {
                                     final ProcedureDto procedureDto = customerRepository.viewStoredProceduresInformation();
                                     assertThat(procedureDto).as("procedure information object").isNotNull();
                                     assertThat(procedureDto.getRoutineSchema()).as("database where procedure is defined")
@@ -190,7 +200,8 @@ Lets retreive information on `findAllCustomers` procedure
                                                                              .isEqualTo("2020-07-25 18:37:39");
                                     assertThat(procedureDto.getSecurityType()).as("security type").isEqualTo(null);
                                     assertThat(procedureDto.getSqlMode()).as("sql mode").isEqualTo("INVOKER");
-                                    }
+                        }
 
 #### 6. Conclusion
+Stored procedures plays a crucial role in creating reporting dashboards.
 
