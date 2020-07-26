@@ -1,5 +1,5 @@
 # Spring Boot MySQL Stored Procedure
-The following Article uses MySQL 8.0.18 running in a docker container.
+This Article uses MySQL version 8.0.18 running in a docker container.
 
 **mysql-docker-compose file**
    
