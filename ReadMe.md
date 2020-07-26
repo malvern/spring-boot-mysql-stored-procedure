@@ -286,5 +286,6 @@ Lets retreive information on `findAllCustomers` procedure
 #### 6. Conclusion
 In this article,we illustrated how to create stored procedures utilising Spring boot properties file.How to call/execute
 stored procedures using SimpleJdbc,StoredProcedure,CallableStatement and JdbcTemplate.
-Code for this article is available at  
+
+Code for this article is available at [SourceCode](https://github.com/malvern/spring-boot-mysql-stored-procedure)
 
