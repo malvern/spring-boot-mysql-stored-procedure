@@ -22,15 +22,46 @@ Stored Procedure encapsulates a group of SQL statements(SELECT,UPDATE,DELETE) in
 
 Stored Procedures plays a crucial role in fine turning of query performance,security and other database operations.
 
-They are stored under stored procedures(tab) within the database.
+They are stored under `Stored Procedures`(tab) within the database.
      
+[procedure image](/images/stored_procedure.png)
 
+This article will focus mainly on how to create Stored Procedure using Spring Boot.
 
-          
- 
- There are many ways in which we can create a Stored procedure but for the simplicity of this article
- we will focus mainly on creation of Mysql stored Procedure using spring boot.
- 
- Lets start by looking at the general structure of a Stored Procedure.
- 
- - When you drop a database, any stored routines in the database are also dropped.
+### 2.0 Basic Stored Procedure Structure
+A basic Stored Procedure consists of a **procedure name** and **routine body** defined in the format below.
+
+           CREATE PROCEDURE stored_procedure_name
+           routine_body:
+                 Valid SQL routine statements
+
+routine body can contain compound statements.
+#### 2.1 Read Stored Procedure
+Using the above stored procedure structure lets create a procedure to retreive all customers from the database.
+    
+         CREATE PROCEDURE findAllCustomers()
+         BEGIN
+            SELECT * FROM customer;
+         END
+Notice we have added BEGIN/END to specify a block of our compound statement(s).
+Lets define the above stored procedure within Spring application.properties file(*yml file was used for this article for easy readbility*).
+
+               customer:
+                   procedure:
+                         find:
+                           all: CREATE PROCEDURE findAllCustomers()
+                                BEGIN
+                                   SELECT * FROM customer;
+                                END
+
+Utilizing Spring Environment to read from stored procedure from `application.yml` file and JdbcTemplate 
+to connect to the database.
+
+                           public void createCustomerRetreiveProcedure() {
+                              final String query = environment.getProperty("customer.procedure.find.all");
+                             jdbcTemplate.execute(query);
+                           }
+
+The above code will create a Stored Procedure in MySQL database,however if a Stored procedure with the similar name exists it will throw `SQLSyntaxErrorException` highlighting that the stored procedure exists.
+Moreover,in case of bad SQL statement it will throw `SQLException`.
+
