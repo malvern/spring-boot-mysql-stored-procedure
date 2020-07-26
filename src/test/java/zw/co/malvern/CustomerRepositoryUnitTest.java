@@ -31,9 +31,58 @@ public class CustomerRepositoryUnitTest {
     }
 
     @Test
-    void name() {
+    @DisplayName("Basic : create find all customer procedure")
+    void createFindAllCustomersShouldCreateStoredProcedureSuccessfully() {
+        customerRepository.createCustomerRetreiveProcedure();
     }
 
+    @Test
+    @DisplayName("IN : create find  customer by age procedure")
+    void createFindCustomersByAgeShouldCreateStoredProcedureSuccessfully() {
+        customerRepository.createFindCustomerByAgeProcedure();
+    }
+
+
+    @Test
+    @DisplayName("OUT: create summing promotional points procedure")
+    void createSumPromotionalPoinsShouldCreateStoredProcedureSuccessfully() {
+        customerRepository.createSumAllPointsProcedure();
+    }
+
+    @Test
+    @DisplayName("INOUT : create summing promotional points procedure")
+    void createFindCustomberBuSurnameShouldCreateStoredProcedureSuccessfully() {
+        customerRepository.findCustomerBySurname();
+    }
+
+
+    @Test
+    @DisplayName("IN and OUT create customer age by name ")
+    void createFindCustomberAgeByNameBuSurnameShouldCreateStoredProcedureSuccessfully() {
+        customerRepository.createFindCustomerAgeByNameProcedure();
+    }
+
+    @Test
+    @DisplayName("Deleting stored procedure")
+    void deleteStoredProcedureShouldDeleteStoredProcedureSuccessfully(){
+        final String procedureName = "findAllCustomers";
+        customerRepository.deleteStoredProcedures(procedureName);
+    }
+
+    @Test
+    @DisplayName("Altering stored procedure")
+    void alteringStoredProcedureShouldDeleteStoredProcedureSuccessfully(){
+        customerRepository.alterCustomerRetreiveProcedure();
+    }
+
+    @Test
+    @DisplayName("retreive customer age using name")
+    void givenCustomerNameWhenfindCustomerByAgeShouldReturnCustomerAge(){
+        final String name = "Tanaka";
+        final Long age = customerRepository.findCustomerByAge(name);
+        assertThat(age).as("Customer Age").isNotNull();
+        assertThat(age).as("Age").isEqualTo(45L);
+    }
     @Test
     @DisplayName("retreive procedure information")
     void viewProcedureInformationShouldReturnProcedureInformation() {

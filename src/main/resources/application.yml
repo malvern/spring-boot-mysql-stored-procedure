@@ -18,34 +18,29 @@ customer:
    find:
         all: CREATE PROCEDURE findAllCustomers()
             BEGIN
-               Select * from customer;
+               SELECT * FROM customer;
             END
         age:
           by:
             name: CREATE PROCEDURE findCustomerAgeByName(IN name VARCHAR(50),OUT age Integer)
                   BEGIN
-                    select customer.age into age  from customer where customer.name = name;
+                    SELECT customer.age into age  FROM customer WHERE customer.name = name;
                   END
-   count:
         by:
-          age: CREATE PROCEDURE findCustomerCountByAge(IN age INTEGER)
+          age: CREATE PROCEDURE findCustomersByAge(IN age INTEGER)
               BEGIN
-                 select count(*) from kyc_database.customer where customer.age>age;
+                 SELECT * FROM kyc_database.customer WHERE customer.age=age;
               END
    by:
-     name: CREATE PROCEDURE findCustomberByName(IN name VARCHAR(50),OUT age INTEGER,OUT surname VARCHAR(50))
-       BEGIN
-       select customer.age,customer.surname INTO age, surname  from  customer where customer.name=name;
-       END
      surname: CREATE PROCEDURE findCustomberBySurname(INOUT surname VARCHAR(50))
        BEGIN
-       select customer.surname INTO surname  from  customer where customer.surname=surname;
+            SELECT customer.surname INTO surname  FROM  customer WHERE customer.surname=surname;
        END
    sum:
     promotion:
        points: CREATE PROCEDURE sumPromotionalPoints(OUT totalPoints VARCHAR(50))
                BEGIN
-                  select SUM(promotion_point) INTO totalPoints from customer;
+                  SELECT SUM(promotion_point) INTO totalPoints FROM customer;
                END
 
    alter:
@@ -57,5 +52,6 @@ customer:
 
 view:
   procedure:
-    information: SELECT * FROM INFORMATION_SCHEMA.ROUTINES  WHERE ROUTINE_NAME = 'findAllCustomers' AND ROUTINE_SCHEMA = 'kyc_database';
+    information: SELECT * FROM INFORMATION_SCHEMA.ROUTINES  WHERE ROUTINE_NAME = 'findAllCustomers'
+                  AND ROUTINE_SCHEMA = 'kyc_database';
 
