@@ -1,0 +1,61 @@
+server:
+  port: 9091
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/kyc_database?createDatabaseIfNotExist=true
+    username: root
+    password: developer@@
+    data: classpath:data.sql
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+
+####Stored procedures
+customer:
+  procedure:
+   find:
+        all: CREATE PROCEDURE findAllCustomers()
+            BEGIN
+               Select * from customer;
+            END
+        age:
+          by:
+            name: CREATE PROCEDURE findCustomerAgeByName(IN name VARCHAR(50),OUT age Integer)
+                  BEGIN
+                    select customer.age into age  from customer where customer.name = name;
+                  END
+   count:
+        by:
+          age: CREATE PROCEDURE findCustomerCountByAge(IN age INTEGER)
+              BEGIN
+                 select count(*) from kyc_database.customer where customer.age>age;
+              END
+   by:
+     name: CREATE PROCEDURE findCustomberByName(IN name VARCHAR(50),OUT age INTEGER,OUT surname VARCHAR(50))
+       BEGIN
+       select customer.age,customer.surname INTO age, surname  from  customer where customer.name=name;
+       END
+     surname: CREATE PROCEDURE findCustomberBySurname(INOUT surname VARCHAR(50))
+       BEGIN
+       select customer.surname INTO surname  from  customer where customer.surname=surname;
+       END
+   sum:
+    promotion:
+       points: CREATE PROCEDURE sumPromotionalPoints(OUT totalPoints VARCHAR(50))
+               BEGIN
+                  select SUM(promotion_point) INTO totalPoints from customer;
+               END
+
+   alter:
+     find:
+       all:  ALTER PROCEDURE findAllCustomers
+             SQL SECURITY INVOKER
+             COMMENT 'This procedure returns all customers';
+
+
+view:
+  procedure:
+    information: SELECT * FROM INFORMATION_SCHEMA.ROUTINES  WHERE ROUTINE_NAME = 'findAllCustomers' AND ROUTINE_SCHEMA = 'kyc_database';
+

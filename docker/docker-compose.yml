@@ -1,0 +1,11 @@
+version: "3"
+services:
+  mysql-stored-procedure-database-container:
+    image: mysql:8.0.18
+    container_name: mysql-stored-procedure-database-container
+    environment:
+      MYSQL_ROOT_PASSWORD: developer@@
+    volumes:
+      - /data/mysql
+    ports:
+      - 127.0.0.1:3307:3306/tcp
