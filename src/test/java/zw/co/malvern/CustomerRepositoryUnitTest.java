@@ -26,7 +26,7 @@ public class CustomerRepositoryUnitTest {
     }
 
     @Test
-    @DisplayName("retreive customer age using name")
+    @DisplayName("SimpleJdbcCall : retreive customer age using name")
     void givenCustomerNameWhenfindCustomerByAgeShouldReturnCustomerAge() {
         final String name = "Tanaka";
         final Integer age = customerRepository.findCustomerByAge(name);
@@ -35,7 +35,7 @@ public class CustomerRepositoryUnitTest {
     }
 
     @Test
-    @DisplayName("retreive customer age using name(StoredProcedure)")
+    @DisplayName("StoredProcedure : retreive customer age using name")
     void givenCustomerNameWhenfindCustomerByAgeShouldReturnCustomerAgeUsingMyStoredProcedure() {
         final String name = "Tanaka";
         final Integer age = customerRepository.findCustomerByAgeUsingStoredProcedure(name);
@@ -44,7 +44,7 @@ public class CustomerRepositoryUnitTest {
     }
 
     @Test
-    @DisplayName("retreive customer age using name(MyStoredProcedure)")
+    @DisplayName("CallableStatement : retreive customer age using name")
     void givenCustomerNameWhenfindCustomerByAgeShouldReturnCustomerAgeUsingCallableStatement() throws SQLException {
         final String name = "Tanaka";
         final Integer age = customerRepository.findCustomerByAgeUsingCallableStatement(name);
@@ -53,7 +53,7 @@ public class CustomerRepositoryUnitTest {
     }
 
     @Test
-    @DisplayName("retreive customer age using name(JdbcTemplate)")
+    @DisplayName("JdbcTemplate : retreive customer age using name")
     void givenCustomerNameWhenfindCustomerByAgeShouldReturnCustomerAgeUsingJdbcTemplate() throws SQLException {
         final String name = "Tanaka";
         final Integer age = customerRepository.findCustomerByAgeUsingJdbcStatement(name);
