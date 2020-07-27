@@ -75,7 +75,7 @@ Stored Procedure can include parameter declarations however,when declaring these
 
 In our case since we need to input age that will be used to filter records within our SQL query.
 
-Hence we declare the input type and direction within our stored procedure as shown below.
+We therefore declare the input type and direction within our stored procedure as shown below.
 
                        CREATE PROCEDURE findCustomersByAge(IN age INTEGER)
                        BEGIN
